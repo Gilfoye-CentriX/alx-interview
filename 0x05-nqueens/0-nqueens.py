@@ -1,84 +1,68 @@
+#!/usr/bin/python3
+"""
+Solution to the nqueens problem
+"""
 import sys
 
-def generate_solutions(row, column):
+
+def backtrack(r, n, cols, pos, neg, board):
     """
-    solve a simple N x N matrix
+    backtrack function to find solution
+    """
+    if r == n:
+        res = []
+        for l in range(len(board)):
+            for k in range(len(board[l])):
+                if board[l][k] == 1:
+                    res.append([l, k])
+        print(res)
+        return
+
+    for c in range(n):
+        if c in cols or (r + c) in pos or (r - c) in neg:
+            continue
+
+        cols.add(c)
+        pos.add(r + c)
+        neg.add(r - c)
+        board[r][c] = 1
+
+        backtrack(r+1, n, cols, pos, neg, board)
+
+        cols.remove(c)
+        pos.remove(r + c)
+        neg.remove(r - c)
+        board[r][c] = 0
+
+
+def nqueens(n):
+    """
+    Solution to nqueens problem
     Args:
-        row (int): Number of rows
-        column (int): Number of columns
-    Returns:
-        returns a list of lists
+        n (int): number of queens. Must be >= 4
+    Return:
+        List of lists representing coordinates of each
+        queen for all possible solutions
     """
-    solution = [[]]
-    for queen in range(row):
-        solution = place_queen(queen, column, solution)
-    return solution
+    cols = set()
+    pos_diag = set()
+    neg_diag = set()
+    board = [[0] * n for i in range(n)]
+
+    backtrack(0, n, cols, pos_diag, neg_diag, board)
 
 
-def place_queen(queen, column, prev_solution):
-    """
-    Place the queen at a certain position
-    Args:
-        queen (int): The queen
-        column (int): The column to move
-        prev_solution (list): the previous move
-    Returns:
-        returns a list
-    """
-    safe_position = []
-    for array in prev_solution:
-        for x in range(column):
-            if is_safe(queen, x, array):
-                safe_position.append(array + [x])
-    return safe_position
-
-
-def is_safe(q, x, array):
-    """
-    check if it's safe to make a move
-    Args:
-        q (int): row to move to
-        x (int): column to move to
-        array (array): the matrix
-    Returns:
-        returns a boolean
-    """
-    if x in array:
-        return (False)
-    else:
-        return all(abs(array[column] - x) != q - column
-                   for column in range(q))
-
-
-def n_queens(N):
-    """
-    The main entry point
-    Args:
-        N (int): The board size (N x N)
-    Returns:
-        returns None
-    """
-    solutions = generate_solutions(N, N)
-    for array in solutions:
-        clean = []
-        for q, x in enumerate(array):
-            clean.append([q, x])
-        print(clean)
-
-
-if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print("Usage: python script_name.py N")
+if __name__ == "__main__":
+    n = sys.argv
+    if len(n) != 2:
+        print("Usage: nqueens N")
         sys.exit(1)
-
     try:
-        N = int(sys.argv[1])
+        nn = int(n[1])
+        if nn < 4:
+            print("N must be at least 4")
+            sys.exit(1)
+        nqueens(nn)
     except ValueError:
         print("N must be a number")
         sys.exit(1)
-
-    if N < 4:
-        print("N must be at least 4")
-        sys.exit(1)
-
-    n_queens(N)
